@@ -359,10 +359,16 @@ document.getElementById("height-slider").addEventListener(
     false
 );
 document.getElementById("clear-overrides-button").addEventListener("click", () => {
+    if (!window.confirm("Are you sure you want to erase all paintbrush changes?")) {
+        return;
+    }
     overridePixelArray = new Array(targetResolution[0] * targetResolution[1] * 4).fill(null);
     runStep2();
 });
 document.getElementById("clear-depth-overrides-button").addEventListener("click", () => {
+    if (!window.confirm("Are you sure you want to erase all depth overrides?")) {
+        return;
+    }
     overrideDepthPixelArray = new Array(targetResolution[0] * targetResolution[1] * 4).fill(null);
     runStep2();
 });
@@ -1635,6 +1641,18 @@ function onCherryPickColor(row, col) {
     document.getElementById("paintbrush-controls").children[0].setAttribute("title", hexName);
     $('[data-toggle="tooltip"]').tooltip("dispose");
     $('[data-toggle="tooltip"]').tooltip();
+
+    // Automatically switch back to Brush tool after picking color
+    selectedPaintbrushTool = "paintbrush-tool-dropdown-option";
+
+    // Update the tool selection dropdown UI label to show Brush
+    const optionsContainer = document.getElementById("paintbrush-tool-selection-dropdown-options");
+    const brushOption = Array.from(optionsContainer.children).find(
+        (el) => el.id === "paintbrush-tool-dropdown-option"
+    );
+    if (brushOption) {
+        document.getElementById("paintbrush-tool-selection-dropdown").innerHTML = brushOption.children[0].innerHTML;
+    }
 }
 
 let activePaintbrushHex = null; // null iff we don't want to paint
@@ -2997,3 +3015,74 @@ window.addEventListener("appinstalled", () => {
 });
 
 enableInteraction(); // enable interaction once everything has loaded in
+
+// Add this helper to highlight the currently selected tool
+function updateToolHighlight() {
+    const optionsContainer = document.getElementById("paintbrush-tool-selection-dropdown-options");
+    if (!optionsContainer) return;
+
+    Array.from(optionsContainer.children).forEach((el) => {
+        if (el.id === selectedPaintbrushTool) {
+            el.classList.add("tool-selected");
+        } else {
+            el.classList.remove("tool-selected");
+        }
+    });
+}
+
+// Call updateToolHighlight() whenever the tool changes
+Array.from(document.getElementById("paintbrush-tool-selection-dropdown-options").children).forEach((item) => {
+    const value = item.id;
+    item.addEventListener("click", () => {
+        selectedPaintbrushTool = value;
+        document.getElementById("paintbrush-color-dropdown").disabled = value !== "paintbrush-tool-dropdown-option";
+        document.getElementById("paintbrush-tool-selection-dropdown").innerHTML = item.children[0].innerHTML;
+        updateToolHighlight(); // <-- highlight the selected tool
+    });
+});
+
+// Also call it after auto-switching back to Brush in onCherryPickColor
+function onCherryPickColor(row, col) {
+    const pixelIndex = 4 * (row * targetResolution[0] + col);
+    const isOverridden =
+        overridePixelArray[pixelIndex] !== null &&
+        overridePixelArray[pixelIndex + 1] !== null &&
+        overridePixelArray[pixelIndex + 2] !== null;
+
+    const step3PixelArray = isBleedthroughEnabled()
+        ? revertDarkenedImage(
+            getPixelArrayFromCanvas(step3Canvas),
+            getDarkenedStudsToStuds(ALL_BRICKLINK_SOLID_COLORS.map((color) => color.hex))
+        )
+        : getPixelArrayFromCanvas(step3Canvas);
+
+    const colorHex = isOverridden
+        ? rgbToHex(
+            overridePixelArray[pixelIndex],
+            overridePixelArray[pixelIndex + 1],
+            overridePixelArray[pixelIndex + 2]
+        )
+        : rgbToHex(step3PixelArray[pixelIndex], step3PixelArray[pixelIndex + 1], step3PixelArray[pixelIndex + 2]);
+    document.getElementById("paintbrush-controls").children[0].children[0].children[0].style.backgroundColor = colorHex;
+    const hexName = ALL_BRICKLINK_SOLID_COLORS.find((color) => color.hex === colorHex).name;
+    document.getElementById("paintbrush-controls").children[0].setAttribute("title", hexName);
+    $('[data-toggle="tooltip"]').tooltip("dispose");
+    $('[data-toggle="tooltip"]').tooltip();
+
+    // Automatically switch back to Brush tool after picking color
+    selectedPaintbrushTool = "paintbrush-tool-dropdown-option";
+
+    // Update the tool selection dropdown UI label to show Brush
+    const optionsContainer = document.getElementById("paintbrush-tool-selection-dropdown-options");
+    const brushOption = Array.from(optionsContainer.children).find(
+        (el) => el.id === "paintbrush-tool-dropdown-option"
+    );
+    if (brushOption) {
+        document.getElementById("paintbrush-tool-selection-dropdown").innerHTML = brushOption.children[0].innerHTML;
+    }
+
+    updateToolHighlight(); // <-- keep highlight in sync
+}
+
+// Initialize highlight on load (defaults to Brush)
+updateToolHighlight();
