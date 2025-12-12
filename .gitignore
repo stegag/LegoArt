@@ -1,3 +1,86 @@
-node_modules
-app/service-worker.js
-app/workbox-*.js
+## Ignore Visual Studio temporary files, build results, and
+## user-specific files
+
+# Visual Studio cache & workspace
+.vs/
+.vscode/
+
+# Build results
+bin/
+obj/
+out/
+Debug/
+Release/
+
+# NuGet packages
+*.nupkg
+packages/
+*.snupkg
+# If using the new PackageReference format, uncomment next line to ignore packaged assets
+# **/packages/*
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.sdf
+*.cachefile
+*.dbmdl
+
+# IntelliCode / IntelliSense
+*.vsp
+*.vsidx
+
+# Logs
+*.log
+
+# Test results
+TestResults/
+*.coverage
+*.coveragexml
+
+# .NET Core artifacts
+*.deps.json
+*.runtimeconfig.json
+
+# Compiled output
+*.dll
+*.exe
+*.pdb
+
+# Publish output
+publish/
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# Other VS metadata
+*.ncb
+*.opensdf
+*.psess
+*.pidb
+*.svclog
+*.scc
+
+# ASP.NET scaffolding
+ScaffoldingReadMe.txt
+
+# Azure
+*.azurePubxml
+*.pubxml
+*.publishproj
+
+# Others
+*.tmp
+*.temp
+*.bak
+
+# Ignore local secrets files
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
