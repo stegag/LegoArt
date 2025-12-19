@@ -1843,11 +1843,13 @@ function getVariablePixelWantedListXML(pixelColorMatrix, variablePixelPieceDimen
  * @param {Uint8ClampedArray} pixelArray - The pixel array from canvas (RGBA format)
  * @param {number} width - Width of the image in pixels
  * @param {number} height - Height of the image in pixels
+ * @param {string} projectName - Name of the project
  * @returns {string} JSON string containing the color matrix data
  */
-function exportColorMatrix(pixelArray, width, height) {
+function exportColorMatrix(pixelArray, width, height, projectName) {
     const colorMatrix = {
         version: "1.0",
+        projectName: projectName || "LegoArt",
         width: width,
         height: height,
         timestamp: new Date().toISOString(),
@@ -1868,7 +1870,7 @@ function exportColorMatrix(pixelArray, width, height) {
 /**
  * Imports a color matrix from JSON and converts it to pixel array format
  * @param {string} jsonString - JSON string containing the exported color matrix
- * @returns {Object} Object containing pixelArray and dimensions {pixelArray, width, height}
+ * @returns {Object} Object containing pixelArray and dimensions {pixelArray, width, height, projectName, timestamp}
  */
 function importColorMatrix(jsonString) {
     const colorMatrix = JSON.parse(jsonString);
@@ -1893,6 +1895,7 @@ function importColorMatrix(jsonString) {
         pixelArray: pixelArray,
         width: colorMatrix.width,
         height: colorMatrix.height,
+        projectName: colorMatrix.projectName,
         timestamp: colorMatrix.timestamp
     };
 }

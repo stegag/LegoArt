@@ -949,6 +949,11 @@ document.getElementById("import-json-file-input").addEventListener(
                 disableInteraction();
                 const importedData = importColorMatrix(reader.result);
 
+                // Load the project name into the input field
+                if (importedData.projectName) {
+                    document.getElementById("projectName").value = importedData.projectName;
+                }
+
                 // Create a black placeholder image for steps 1 and 2
                 inputCanvas.width = SERIALIZE_EDGE_LENGTH;
                 inputCanvas.height = SERIALIZE_EDGE_LENGTH;
@@ -1080,7 +1085,8 @@ function updateColorMatrixExportLink() {
         const colorMatrixJson = exportColorMatrix(
             step3PixelArray,
             targetResolution[0],
-            targetResolution[1]
+            targetResolution[1],
+            projectName  // Add projectName parameter
         );
 
         window.URL.revokeObjectURL(document.getElementById("export-color-matrix-button").href);
@@ -1092,7 +1098,7 @@ function updateColorMatrixExportLink() {
             )
         );
         // Set the filename to the project name
-        exportButton.setAttribute("download", `${projectName}-color-matrix.json`);
+        exportButton.setAttribute("download", `${projectName}.json`);
     }
 }
 
@@ -1136,6 +1142,11 @@ document.getElementById("import-color-matrix-file-input").addEventListener(
             try {
                 disableInteraction();
                 const importedData = importColorMatrix(reader.result);
+
+                // Load the project name into the input field
+                if (importedData.projectName) {
+                    document.getElementById("projectName").value = importedData.projectName;
+                }
 
                 // Update target resolution to match imported data
                 if (importedData.width !== targetResolution[0] || importedData.height !== targetResolution[1]) {
