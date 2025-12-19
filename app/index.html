@@ -1110,6 +1110,46 @@
                                       </div>
                                   </div>
 
+                                  <div class="card accordion-card">
+                                      <div class="card-header" id="step-3-export-import-heading">
+                                          <h5 class="mb-0">
+                                              <button class="btn btn-link collapsed"
+                                                      data-toggle="collapse"
+                                                      data-target="#step-3-export-import-collapse"
+                                                      aria-expanded="false"
+                                                      aria-controls="step-3-export-import-collapse">
+                                                  Export/Import Color Matrix
+                                              </button>
+                                          </h5>
+                                      </div>
+                                      <div id="step-3-export-import-collapse"
+                                           class="collapse"
+                                           aria-labelledby="step-3-export-import-heading"
+                                           data-parent="#step-3-accordion">
+                                          <div class="card-body accordion-card-body">
+                                              <small>
+                                                  <p style="margin-left: 4px; margin-bottom: 8px">
+                                                      &#9679; Export the current pixelated image color data to a JSON file
+                                                  </p>
+                                                  <p style="margin-left: 4px; margin-bottom: 8px">
+                                                      &#9679; Import a previously exported color matrix to restore the image
+                                                  </p>
+                                              </small>
+                                              <div style="padding-bottom: 10px">
+                                                  <a id="export-color-matrix-button" download="color-matrix.json" href="">
+                                                      <button class="btn btn-success" type="button">Export Color Matrix</button>
+                                                  </a>
+                                              </div>
+                                              <div style="padding-bottom: 10px">
+                                                  <input type="file" id="import-color-matrix-file-input" accept=".json" hidden />
+                                                  <button class="btn btn-info" type="button" id="import-color-matrix-button">
+                                                      Import Color Matrix
+                                                  </button>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+
                                   <div class="card accordion-card hide-on-step-3-expansion">
                                       <div class="card-header" id="step-3-3-heading">
                                           <h5 class="mb-0">
@@ -1764,6 +1804,10 @@
                           <div style="margin-top: 12px">
                               <button class="btn btn-success" type="button" id="input-image-selector" disabled>
                                   Select Input Image
+                              </button>
+                              <input type="file" id="import-json-file-input" accept=".json" hidden />
+                              <button class="btn btn-info" type="button" id="import-json-button" style="margin-left: 8px">
+                                  Import JSON
                               </button>
                           </div>
                       </span>

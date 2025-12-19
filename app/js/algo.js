@@ -1835,3 +1835,64 @@ function getVariablePixelWantedListXML(pixelColorMatrix, variablePixelPieceDimen
     \n${items.join("\n")}\n
   </INVENTORY>`;
 }
+
+// Add these functions at the end of the file
+
+/**
+ * Exports the pixelated image color matrix as JSON
+ * @param {Uint8ClampedArray} pixelArray - The pixel array from canvas (RGBA format)
+ * @param {number} width - Width of the image in pixels
+ * @param {number} height - Height of the image in pixels
+ * @returns {string} JSON string containing the color matrix data
+ */
+function exportColorMatrix(pixelArray, width, height) {
+    const colorMatrix = {
+        version: "1.0",
+        width: width,
+        height: height,
+        timestamp: new Date().toISOString(),
+        pixels: []
+    };
+
+    // Convert RGBA pixel array to RGB hex values
+    for (let i = 0; i < pixelArray.length; i += 4) {
+        const r = pixelArray[i];
+        const g = pixelArray[i + 1];
+        const b = pixelArray[i + 2];
+        colorMatrix.pixels.push(rgbToHex(r, g, b));
+    }
+
+    return JSON.stringify(colorMatrix, null, 2);
+}
+
+/**
+ * Imports a color matrix from JSON and converts it to pixel array format
+ * @param {string} jsonString - JSON string containing the exported color matrix
+ * @returns {Object} Object containing pixelArray and dimensions {pixelArray, width, height}
+ */
+function importColorMatrix(jsonString) {
+    const colorMatrix = JSON.parse(jsonString);
+
+    if (!colorMatrix.version || !colorMatrix.width || !colorMatrix.height || !colorMatrix.pixels) {
+        throw new Error("Invalid color matrix format");
+    }
+
+    const pixelArray = new Uint8ClampedArray(colorMatrix.pixels.length * 4);
+
+    // Convert hex values back to RGBA format
+    colorMatrix.pixels.forEach((hexColor, index) => {
+        const rgb = hexToRgb(hexColor);
+        const pixelIndex = index * 4;
+        pixelArray[pixelIndex] = rgb[0];
+        pixelArray[pixelIndex + 1] = rgb[1];
+        pixelArray[pixelIndex + 2] = rgb[2];
+        pixelArray[pixelIndex + 3] = 255; // Alpha channel
+    });
+
+    return {
+        pixelArray: pixelArray,
+        width: colorMatrix.width,
+        height: colorMatrix.height,
+        timestamp: colorMatrix.timestamp
+    };
+}

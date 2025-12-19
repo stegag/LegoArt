@@ -926,6 +926,273 @@ paintbrushDropdown.children[0].className = "btn paintbrush-controls-button";
 paintbrushDropdown.style = "height: 100%;";
 document.getElementById("paintbrush-controls").appendChild(paintbrushDropdown);
 
+// Add event listener to update export filename when project name changes
+document.getElementById("projectName").addEventListener("input", () => {
+    updateColorMatrixExportLink();
+});
+
+// Import JSON button - Creates black placeholder and imports color matrix
+document.getElementById("import-json-button").addEventListener("click", () => {
+    document.getElementById("import-json-file-input").click();
+});
+
+document.getElementById("import-json-file-input").addEventListener(
+    "change",
+    (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const filename = file.name;
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            try {
+                disableInteraction();
+                const importedData = importColorMatrix(reader.result);
+
+                // Create a black placeholder image for steps 1 and 2
+                inputCanvas.width = SERIALIZE_EDGE_LENGTH;
+                inputCanvas.height = SERIALIZE_EDGE_LENGTH;
+                inputCanvasContext.fillStyle = "#000000";
+                inputCanvasContext.fillRect(0, 0, SERIALIZE_EDGE_LENGTH, SERIALIZE_EDGE_LENGTH);
+
+                inputDepthCanvas.width = SERIALIZE_EDGE_LENGTH;
+                inputDepthCanvas.height = SERIALIZE_EDGE_LENGTH;
+                inputDepthCanvasContext.fillStyle = "black";
+                inputDepthCanvasContext.fillRect(0, 0, inputDepthCanvas.width, inputDepthCanvas.height);
+
+                // Create a dummy image object
+                inputImage = new Image();
+                inputImage.width = SERIALIZE_EDGE_LENGTH;
+                inputImage.height = SERIALIZE_EDGE_LENGTH;
+                inputImage.src = inputCanvas.toDataURL();
+
+                // Show the steps UI
+                document.getElementById("steps-row").hidden = false;
+                document.getElementById("input-image-selector").innerHTML = "Reselect Input Image";
+                document.getElementById("image-input-new").appendChild(document.getElementById("image-input"));
+                document.getElementById("image-input-card").hidden = true;
+                document.getElementById("run-example-input-container").hidden = true;
+
+                // Set up Step 1 with the black placeholder
+                step1CanvasUpscaled.width = SERIALIZE_EDGE_LENGTH;
+                step1CanvasUpscaled.height = SERIALIZE_EDGE_LENGTH;
+                step1CanvasUpscaledContext.fillStyle = "#000000";
+                step1CanvasUpscaledContext.fillRect(0, 0, SERIALIZE_EDGE_LENGTH, SERIALIZE_EDGE_LENGTH);
+
+                // Update depth canvas for Step 1
+                step1DepthCanvasUpscaled.width = SERIALIZE_EDGE_LENGTH;
+                step1DepthCanvasUpscaled.height = SERIALIZE_EDGE_LENGTH;
+                step1DepthCanvasUpscaledContext.fillStyle = "#000000";
+                step1DepthCanvasUpscaledContext.fillRect(0, 0, SERIALIZE_EDGE_LENGTH, SERIALIZE_EDGE_LENGTH);
+
+                // Update target resolution to match imported data
+                targetResolution[0] = importedData.width;
+                targetResolution[1] = importedData.height;
+                document.getElementById("width-slider").value = importedData.width;
+                document.getElementById("height-slider").value = importedData.height;
+                document.getElementById("width-text").innerHTML = importedData.width;
+                document.getElementById("height-text").innerHTML = importedData.height;
+
+                // Update resolution-related arrays
+                overridePixelArray = new Array(targetResolution[0] * targetResolution[1] * 4).fill(null);
+                overrideDepthPixelArray = new Array(targetResolution[0] * targetResolution[1] * 4).fill(null);
+
+                // Update tooltips
+                document.getElementById("width-text").title = `${(targetResolution[0] * PIXEL_WIDTH_CM).toFixed(1)} cm, ${(
+                    targetResolution[0] *
+                    PIXEL_WIDTH_CM *
+                    INCHES_IN_CM
+                ).toFixed(1)}″`;
+                document.getElementById("height-text").title = `${(targetResolution[1] * PIXEL_WIDTH_CM).toFixed(1)} cm, ${(
+                    targetResolution[1] *
+                    PIXEL_WIDTH_CM *
+                    INCHES_IN_CM
+                ).toFixed(1)}″`;
+                $('[data-toggle="tooltip"]').tooltip("dispose");
+                $('[data-toggle="tooltip"]').tooltip();
+
+                // Initialize cropper
+                initializeCropper();
+
+                // Create black image for Step 2
+                step2Canvas.width = importedData.width;
+                step2Canvas.height = importedData.height;
+                step2CanvasContext.fillStyle = "#000000";
+                step2CanvasContext.fillRect(0, 0, importedData.width, importedData.height);
+
+                step2CanvasUpscaled.width = importedData.width * SCALING_FACTOR;
+                step2CanvasUpscaled.height = importedData.height * SCALING_FACTOR;
+                step2CanvasUpscaledContext.fillStyle = "#000000";
+                step2CanvasUpscaledContext.fillRect(0, 0, step2CanvasUpscaled.width, step2CanvasUpscaled.height);
+
+                // Apply imported pixels to Step 3
+                step3Canvas.width = importedData.width;
+                step3Canvas.height = importedData.height;
+                drawPixelsOnCanvas(importedData.pixelArray, step3Canvas);
+
+                // Update step 3 upscaled canvas
+                step3CanvasUpscaled.width = importedData.width * SCALING_FACTOR;
+                step3CanvasUpscaled.height = importedData.height * SCALING_FACTOR;
+                step3CanvasUpscaledContext.imageSmoothingEnabled = false;
+
+                const revertedPixels = isBleedthroughEnabled()
+                    ? revertDarkenedImage(
+                        importedData.pixelArray,
+                        getDarkenedStudsToStuds(ALL_BRICKLINK_SOLID_COLORS.map((color) => color.hex))
+                    )
+                    : importedData.pixelArray;
+
+                drawStudImageOnCanvas(
+                    revertedPixels,
+                    importedData.width,
+                    SCALING_FACTOR,
+                    step3CanvasUpscaled,
+                    selectedPixelPartNumber,
+                    step3VariablePixelPieceDimensions
+                );
+
+                step3CanvasPixelsForHover = revertedPixels;
+
+                // Continue to step 4
+                runStep4();
+
+                alert(`Color matrix imported successfully!\nFile: ${filename}\nResolution: ${importedData.width}x${importedData.height}`);
+
+                document.getElementById("import-json-file-input").value = null;
+            } catch (error) {
+                enableInteraction();
+                alert("Error importing JSON file: " + error.message);
+                console.error("Import error:", error);
+            }
+        };
+        reader.readAsText(file);
+    },
+    false
+);
+
+// Replace the existing Export Color Matrix functionality with this updated version
+
+// Export Color Matrix functionality
+function updateColorMatrixExportLink() {
+    if (step3Canvas.width > 0 && step3Canvas.height > 0) {
+        const step3PixelArray = getPixelArrayFromCanvas(step3Canvas);
+        const projectName = getProjectName();
+        const colorMatrixJson = exportColorMatrix(
+            step3PixelArray,
+            targetResolution[0],
+            targetResolution[1]
+        );
+
+        window.URL.revokeObjectURL(document.getElementById("export-color-matrix-button").href);
+        const exportButton = document.getElementById("export-color-matrix-button");
+        exportButton.setAttribute(
+            "href",
+            window.URL.createObjectURL(
+                new Blob([colorMatrixJson], { type: "application/json" })
+            )
+        );
+        // Set the filename to the project name
+        exportButton.setAttribute("download", `${projectName}-color-matrix.json`);
+    }
+}
+
+// Update export link whenever step 3 completes
+const originalRunStep3 = runStep3;
+runStep3 = function () {
+    originalRunStep3();
+    setTimeout(updateColorMatrixExportLink, 100);
+};
+
+// Import Color Matrix functionality - Only enable if image is loaded
+function updateImportButtonState() {
+    const importButton = document.getElementById("import-color-matrix-button");
+    if (inputImage !== null) {
+        importButton.disabled = false;
+    } else {
+        importButton.disabled = true;
+    }
+}
+
+// Call this initially and whenever an image is loaded
+updateImportButtonState();
+
+document.getElementById("import-color-matrix-button").addEventListener("click", () => {
+    if (inputImage === null) {
+        alert("Please upload an image in Step 1 before importing a color matrix.");
+        return;
+    }
+    document.getElementById("import-color-matrix-file-input").click();
+});
+
+document.getElementById("import-color-matrix-file-input").addEventListener(
+    "change",
+    (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const filename = file.name;
+        const reader = new FileReader();
+        reader.onload = function (event) {
+            try {
+                disableInteraction();
+                const importedData = importColorMatrix(reader.result);
+
+                // Update target resolution to match imported data
+                if (importedData.width !== targetResolution[0] || importedData.height !== targetResolution[1]) {
+                    targetResolution[0] = importedData.width;
+                    targetResolution[1] = importedData.height;
+                    document.getElementById("width-slider").value = importedData.width;
+                    document.getElementById("height-slider").value = importedData.height;
+                    document.getElementById("width-text").innerHTML = importedData.width;
+                    document.getElementById("height-text").innerHTML = importedData.height;
+                    handleResolutionChange();
+                }
+
+                // Apply imported pixels directly to step 3
+                step3Canvas.width = importedData.width;
+                step3Canvas.height = importedData.height;
+                drawPixelsOnCanvas(importedData.pixelArray, step3Canvas);
+
+                // Update step 3 upscaled canvas
+                step3CanvasUpscaled.width = importedData.width * SCALING_FACTOR;
+                step3CanvasUpscaled.height = importedData.height * SCALING_FACTOR;
+                step3CanvasUpscaledContext.imageSmoothingEnabled = false;
+
+                const revertedPixels = isBleedthroughEnabled()
+                    ? revertDarkenedImage(
+                        importedData.pixelArray,
+                        getDarkenedStudsToStuds(ALL_BRICKLINK_SOLID_COLORS.map((color) => color.hex))
+                    )
+                    : importedData.pixelArray;
+
+                drawStudImageOnCanvas(
+                    revertedPixels,
+                    importedData.width,
+                    SCALING_FACTOR,
+                    step3CanvasUpscaled,
+                    selectedPixelPartNumber,
+                    step3VariablePixelPieceDimensions
+                );
+
+                step3CanvasPixelsForHover = revertedPixels;
+
+                // Continue to step 4
+                runStep4();
+
+                alert(`Color matrix imported successfully!\nFile: ${filename}\nResolution: ${importedData.width}x${importedData.height}`);
+
+                document.getElementById("import-color-matrix-file-input").value = null;
+            } catch (error) {
+                enableInteraction();
+                alert("Error importing color matrix: " + error.message);
+                console.error("Import error:", error);
+            }
+        };
+        reader.readAsText(file);
+    },
+    false
+);
+
 function getNewCustomStudRow() {
     const studRow = document.createElement("tr");
 
@@ -2862,6 +3129,7 @@ function handleInputImage(e, dontClearDepth, dontLog) {
             overridePixelArray = new Array(targetResolution[0] * targetResolution[1] * 4).fill(null);
             overrideDepthPixelArray = new Array(targetResolution[0] * targetResolution[1] * 4).fill(null);
             initializeCropper();
+            updateImportButtonState();
             runStep1();
         }, 50); // TODO: find better way to check that input is finished
 
