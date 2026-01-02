@@ -954,11 +954,21 @@ document.getElementById("import-json-file-input").addEventListener(
                     document.getElementById("projectName").value = importedData.projectName;
                 }
 
-                // Create a black placeholder image for steps 1 and 2
+                // Create temporary canvas with imported data at correct resolution
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = importedData.width;
+                tempCanvas.height = importedData.height;
+                const tempContext = tempCanvas.getContext('2d');
+                drawPixelsOnCanvas(importedData.pixelArray, tempCanvas);
+                
+                // Scale imported data to inputCanvas (not black)
                 inputCanvas.width = SERIALIZE_EDGE_LENGTH;
                 inputCanvas.height = SERIALIZE_EDGE_LENGTH;
-                inputCanvasContext.fillStyle = "#000000";
-                inputCanvasContext.fillRect(0, 0, SERIALIZE_EDGE_LENGTH, SERIALIZE_EDGE_LENGTH);
+                inputCanvasContext.drawImage(
+                    tempCanvas,
+                    0, 0, importedData.width, importedData.height,
+                    0, 0, SERIALIZE_EDGE_LENGTH, SERIALIZE_EDGE_LENGTH
+                );
 
                 inputDepthCanvas.width = SERIALIZE_EDGE_LENGTH;
                 inputDepthCanvas.height = SERIALIZE_EDGE_LENGTH;
@@ -978,11 +988,14 @@ document.getElementById("import-json-file-input").addEventListener(
                 document.getElementById("image-input-card").hidden = true;
                 document.getElementById("run-example-input-container").hidden = true;
 
-                // Set up Step 1 with the black placeholder
+                // Set up Step 1 with imported data (not black)
                 step1CanvasUpscaled.width = SERIALIZE_EDGE_LENGTH;
                 step1CanvasUpscaled.height = SERIALIZE_EDGE_LENGTH;
-                step1CanvasUpscaledContext.fillStyle = "#000000";
-                step1CanvasUpscaledContext.fillRect(0, 0, SERIALIZE_EDGE_LENGTH, SERIALIZE_EDGE_LENGTH);
+                step1CanvasUpscaledContext.drawImage(
+                    inputCanvas,
+                    0, 0, SERIALIZE_EDGE_LENGTH, SERIALIZE_EDGE_LENGTH,
+                    0, 0, step1CanvasUpscaled.width, step1CanvasUpscaled.height
+                );
 
                 // Update depth canvas for Step 1
                 step1DepthCanvasUpscaled.width = SERIALIZE_EDGE_LENGTH;
@@ -1019,21 +1032,43 @@ document.getElementById("import-json-file-input").addEventListener(
                 // Initialize cropper
                 initializeCropper();
 
-                // Create black image for Step 2
+                // Set cropper to use the entire image (no cropping)
+                // This ensures runStep2() processes the full imported data
+                setTimeout(() => {
+                    if (inputImageCropper) {
+                        inputImageCropper.setData({
+                            x: 0,
+                            y: 0,
+                            width: step1CanvasUpscaled.width,
+                            height: step1CanvasUpscaled.height,
+                            rotate: 0,
+                            scaleX: 1,
+                            scaleY: 1
+                        });
+                    }
+                }, 100);
+
+                // Create Step 2 with imported data (not black)
                 step2Canvas.width = importedData.width;
                 step2Canvas.height = importedData.height;
-                step2CanvasContext.fillStyle = "#000000";
-                step2CanvasContext.fillRect(0, 0, importedData.width, importedData.height);
+                drawPixelsOnCanvas(importedData.pixelArray, step2Canvas);
 
                 step2CanvasUpscaled.width = importedData.width * SCALING_FACTOR;
                 step2CanvasUpscaled.height = importedData.height * SCALING_FACTOR;
-                step2CanvasUpscaledContext.fillStyle = "#000000";
-                step2CanvasUpscaledContext.fillRect(0, 0, step2CanvasUpscaled.width, step2CanvasUpscaled.height);
+                step2CanvasUpscaledContext.imageSmoothingEnabled = false;
+                step2CanvasUpscaledContext.drawImage(
+                    step2Canvas,
+                    0, 0, importedData.width, importedData.height,
+                    0, 0, step2CanvasUpscaled.width, step2CanvasUpscaled.height
+                );
 
                 // Apply imported pixels to Step 3
                 step3Canvas.width = importedData.width;
                 step3Canvas.height = importedData.height;
                 drawPixelsOnCanvas(importedData.pixelArray, step3Canvas);
+                
+                // Store this as the pixel array for eraser
+                step3PixelArrayForEraser = importedData.pixelArray.slice();
 
                 // Update step 3 upscaled canvas
                 step3CanvasUpscaled.width = importedData.width * SCALING_FACTOR;
