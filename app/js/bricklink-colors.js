@@ -16,7 +16,7 @@ let ALL_BRICKLINK_SOLID_COLORS = [
     },
     {
         name: "Light Bluish Gray",
-        hex: "#afb5c7",
+        hex: "#b5b5b5",
         id: 86,
     },
     {
@@ -36,7 +36,7 @@ let ALL_BRICKLINK_SOLID_COLORS = [
     },
     {
         name: "Black",
-        hex: "#212121",
+        hex: "#000000",
         id: 11,
     },
     {
@@ -46,7 +46,7 @@ let ALL_BRICKLINK_SOLID_COLORS = [
     },
     {
         name: "Red",
-        hex: "#b30006",
+        hex: "#e80000",
         id: 5,
     },
     {
@@ -56,7 +56,7 @@ let ALL_BRICKLINK_SOLID_COLORS = [
     },
     {
         name: "Coral",
-        hex: "#f88379",
+        hex: "#fe4766",
         id: 220,
     },
     {
@@ -66,7 +66,7 @@ let ALL_BRICKLINK_SOLID_COLORS = [
     },
     {
         name: "Light Salmon",
-        hex: "#ffdedc",
+        hex: "#f8d5c1",
         id: 26,
     },
     {
@@ -76,7 +76,7 @@ let ALL_BRICKLINK_SOLID_COLORS = [
     },
     {
         name: "Reddish Brown",
-        hex: "#89351d",
+        hex: "#4d1a0e",
         id: 88,
     },
     {
@@ -86,7 +86,7 @@ let ALL_BRICKLINK_SOLID_COLORS = [
     },
     {
         name: "Dark Brown",
-        hex: "#330000",
+        hex: "#170302",
         id: 120,
     },
     {
@@ -106,7 +106,7 @@ let ALL_BRICKLINK_SOLID_COLORS = [
     },
     {
         name: "Nougat",
-        hex: "#ffaf7d",
+        hex: "#eb9173",
         id: 28,
     },
     {
@@ -116,7 +116,7 @@ let ALL_BRICKLINK_SOLID_COLORS = [
     },
     {
         name: "Dark Nougat",
-        hex: "#e78b3e",
+        hex: "#c2736f",
         id: 225,
     },
     {
@@ -186,7 +186,7 @@ let ALL_BRICKLINK_SOLID_COLORS = [
     },
     {
         name: "Bright Light Yellow",
-        hex: "#f3e055",
+        hex: "#fffe91",
         id: 103,
     },
     {
@@ -231,12 +231,12 @@ let ALL_BRICKLINK_SOLID_COLORS = [
     },
     {
         name: "Green",
-        hex: "#00642e",
+        hex: "#009442",
         id: 6,
     },
     {
         name: "Bright Green",
-        hex: "#10cb31",
+        hex: "#0fbf2e",
         id: 36,
     },
     {
@@ -256,7 +256,7 @@ let ALL_BRICKLINK_SOLID_COLORS = [
     },
     {
         name: "Dark Turquoise",
-        hex: "#008a80",
+        hex: "#00a397",
         id: 39,
     },
     {
@@ -276,7 +276,7 @@ let ALL_BRICKLINK_SOLID_COLORS = [
     },
     {
         name: "Dark Blue",
-        hex: "#143044",
+        hex: "#1b415c",
         id: 63,
     },
     {
@@ -321,7 +321,7 @@ let ALL_BRICKLINK_SOLID_COLORS = [
     },
     {
         name: "Sand Blue",
-        hex: "#5a7184",
+        hex: "#788ea1",
         id: 55,
     },
     {
@@ -351,7 +351,7 @@ let ALL_BRICKLINK_SOLID_COLORS = [
     },
     {
         name: "Dark Purple",
-        hex: "#5f2683",
+        hex: "#523880",
         id: 89,
     },
     {
@@ -366,7 +366,7 @@ let ALL_BRICKLINK_SOLID_COLORS = [
     },
     {
         name: "Medium Lavender",
-        hex: "#885e9e",
+        hex: "#9a6ab3",
         id: 157,
     },
     {
@@ -376,7 +376,7 @@ let ALL_BRICKLINK_SOLID_COLORS = [
     },
     {
         name: "Lavender",
-        hex: "#b18cbf",
+        hex: "#cea3de",
         id: 154,
     },
     {
@@ -386,12 +386,12 @@ let ALL_BRICKLINK_SOLID_COLORS = [
     },
     {
         name: "Magenta",
-        hex: "#b52952",
+        hex: "#a1235d",
         id: 71,
     },
     {
         name: "Dark Pink",
-        hex: "#c87080",
+        hex: "#e167b4",
         id: 47,
     },
     {
@@ -448,6 +448,29 @@ let ALL_BRICKLINK_SOLID_COLORS = [
         hex: "#D9C594",
         id: 241,
     },
+
+    //Stegag
+
+    {
+        name: "Skin White",
+        hex: "#fff6f3",
+        id: 555,
+    },
+    {
+        name: "Flesh Pink",
+        hex: "#f2dcc6", 
+        id: 666,
+    },
+    {
+        name: "Army Green",
+        hex: "#4a4927", 
+        id: 242,
+    },
+    {
+        name: "Rose Pink",
+        hex: "#ffdedc",
+        id: 56,
+    }
 ];
 
 const HEX_TO_COLOR_NAME = {};
@@ -521,6 +544,25 @@ const KNOWN_BRICKLINK_STUD_COLOR_NAMES = [
     "Glow In Dark White",
     "Medium Lavender", // manually added from Batman
     "Light Aqua", // manually added from Batman
+    "Very Light Gray", // stegag
+    "Light Gray", // stegag
+    "Very Light Bluish Grey", // stegag
+    "Dark Gray", // stegag
+    "Sand Red", // stegag
+    "Skin White", // stegag
+    "Flesh Pink", // stegag
+    "Light Salmon", // stegag
+    "Medium Tan", // stegag
+    "Dark Nougat", // stegag
+    "Dark Green", // stegag
+    "Army Green", // stegag
+    "Green", // stegag
+    "Bright Green", // stegag
+    "Sand Green", // stegag
+    "Blue-Violet", // stegag
+    "Dark Purple", // stegag
+    "Medium Lavender", // stegag
+    "Rose Pink" // stegag"
 ];
 
 const KNOWN_BRICKLINK_TILE_COLOR_NAMES = [
@@ -551,26 +593,6 @@ const KNOWN_BRICKLINK_TILE_COLOR_NAMES = [
     "Tan",
     "White",
     "Yellow",
-    "Trans-Black",
-    "Trans-Bright Green",
-    "Trans-Clear",
-    "Trans-Dark Blue",
-    "Trans-Dark Pink",
-    "Trans-Green",
-    "Trans-Light Blue",
-    "Trans-Orange",
-    "Trans-Purple",
-    "Trans-Red",
-    "Trans-Yellow",
-    "Flat Silver",
-    "Pearl Gold",
-    "Satin Trans-Light Blue",
-    "Satin White",
-    "Glow In Dark White",
-    "Glitter Trans-Clear",
-    "Glitter Trans-Dark Pink",
-    "Glitter Trans-Light Blue",
-    "Dark Bluish Gray", // manually added from Warhol
     "Dark Pink", // manually added from Warhol
     "Magenta", // manually added from Warhol
     "Medium Azure", // manually added from Warhol
@@ -581,6 +603,25 @@ const KNOWN_BRICKLINK_TILE_COLOR_NAMES = [
     "Bright Green", // manually added from art project
     "Dark Turquoise", // manually added from dots
     "Yellowish Green", // manually added from dots
+    "Very Light Gray", // stegag
+    "Light Gray", // stegag
+    "Very Light Bluish Grey", // stegag
+    "Dark Gray", // stegag
+    "Sand Red", // stegag
+    "Skin White", // stegag
+    "Flesh Pink", // stegag
+    "Light Salmon", // stegag
+    "Medium Tan", // stegag
+    "Dark Nougat", // stegag
+    "Dark Green", // stegag
+    "Army Green", // stegag
+    "Green", // stegag
+    "Bright Green", // stegag
+    "Sand Green", // stegag
+    "Blue-Violet", // stegag
+    "Dark Purple", // stegag
+    "Medium Lavender", // stegag
+    "Rose Pink" // stegag"
 ];
 
 const BRICKLINK_STUD_COLORS = ALL_BRICKLINK_SOLID_COLORS.filter((color) =>
