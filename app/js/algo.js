@@ -982,10 +982,11 @@ function drawStudCountForContext(
     const radius = scalingFactor / 2;
     ctx.font = `${scalingFactor / 2}px Arial`;
     availableStudHexList.forEach((pixelHex, i) => {
-        const number = i + 1;
+        const colorName = HEX_TO_COLOR_NAME[pixelHex] || pixelHex;
+        const number = COLOR_NAME_TO_ID[colorName] || (i + 1);
         ctx.beginPath();
         const x = horizontalOffset;
-        const y = verticalOffset + radius * 2.5 * number;
+        const y = verticalOffset + radius * 2.5 * (i + 1);
         drawPixel(
             ctx,
             x - radius,
@@ -996,13 +997,13 @@ function drawStudCountForContext(
             PIXEL_TYPE_TO_FLATTENED[pixelType]
         );
         ctx.fillStyle = inverseHex(pixelHex);
-        ctx.fillText(number, x - (scalingFactor * (1 + Math.floor(number / 2) / 6)) / 8, y + scalingFactor / 8);
+        const numberText = String(number); const textWidth = ctx.measureText(numberText).width; ctx.fillText(numberText, x - textWidth / 2, y + scalingFactor / 8);
         ctx.fillStyle = "#000000";
         if (!("" + pixelType).match("^variable.*$")) {
             ctx.fillText(`X ${studMap[pixelHex] || 0}`, x + radius * 1.5, y);
         }
         ctx.font = `${scalingFactor / 2.5}px Arial`;
-        ctx.fillText(HEX_TO_COLOR_NAME[pixelHex] || pixelHex, x + radius * 1.5, y + scalingFactor / 2.5);
+        ctx.fillText(colorName, x + radius * 1.5, y + scalingFactor / 2.5);
         ctx.font = `${scalingFactor / 2}px Arial`;
     });
 
@@ -1146,7 +1147,8 @@ function generateInstructionPage(
 
     const studToNumber = {};
     availableStudHexList.forEach((stud, i) => {
-        studToNumber[stud] = i + 1;
+        const colorName = HEX_TO_COLOR_NAME[stud] || stud;
+        studToNumber[stud] = COLOR_NAME_TO_ID[colorName] || (i + 1);
     });
 
     ctx.font = `${scalingFactor / 2}px Arial`;
@@ -1172,11 +1174,9 @@ function generateInstructionPage(
                 PIXEL_TYPE_TO_FLATTENED[pixelType]
             );
             ctx.fillStyle = inverseHex(pixelHex);
-            ctx.fillText(
-                studToNumber[pixelHex],
-                x - (scalingFactor * (1 + Math.floor(studToNumber[pixelHex] / 2) / 6)) / 8,
-                y + scalingFactor / 8
-            );
+            const numberText = String(studToNumber[pixelHex]);
+            const textWidth = ctx.measureText(numberText).width;
+            ctx.fillText(numberText, x - textWidth / 2, y + scalingFactor / 8);
         }
     }
 
