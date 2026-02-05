@@ -414,11 +414,11 @@ let ALL_BRICKLINK_SOLID_COLORS = [
         hex: "#ffe1ff",
         id: 56,
     },
-    {
-        name: "Neon Yellow",
-        hex: "#fffc00",
-        id: 236,
-    },
+    //{ Stegag doesn't have this color
+    //    name: "Neon Yellow",
+    //    hex: "#fffc00",
+    //    id: 236,
+    //},
     // add in some pearl colors to support specific sets,
     // but avoid the other pearl colors for now since they
     // may weirdly replace similar solid non pearl
@@ -445,7 +445,7 @@ let ALL_BRICKLINK_SOLID_COLORS = [
     // },
     {
         name: "Medium Tan",
-        hex: "#D9C594",
+        hex: "#d9c594",
         id: 241,
     },
 
@@ -596,7 +596,7 @@ const KNOWN_BRICKLINK_TILE_COLOR_NAMES = [
     "Dark Pink", // manually added from Warhol
     "Magenta", // manually added from Warhol
     "Medium Azure", // manually added from Warhol
-    "Neon Yellow", // manually added from dots
+    //"Neon Yellow", // manually added from dots
     "Dark Azure", // manually added from art project
     "Light Aqua", // manually added from art project
     "Bright Light Yellow", // manually added from art project
@@ -627,18 +627,18 @@ const KNOWN_BRICKLINK_TILE_COLOR_NAMES = [
 const BRICKLINK_STUD_COLORS = ALL_BRICKLINK_SOLID_COLORS.filter((color) =>
     KNOWN_BRICKLINK_STUD_COLOR_NAMES.includes(color.name)
 ).sort((a, b) => {
-    return a.name > b.name ? 1 : -1;
+    return a.id - b.id;
 });
 
 const BRICKLINK_TILE_COLORS = ALL_BRICKLINK_SOLID_COLORS.filter((color) =>
     KNOWN_BRICKLINK_TILE_COLOR_NAMES.includes(color.name)
 ).sort((a, b) => {
-    return a.name > b.name ? 1 : -1;
+    return a.id - b.id;
 });
 
 const ADDITIONAL_COLORS = ["Very Light Gray"];
 let ALL_VALID_BRICKLINK_COLORS = ALL_BRICKLINK_SOLID_COLORS.sort((a, b) => {
-    return a.name > b.name ? 1 : -1;
+    return a.id - b.id;
 });
 // .filter(
 //     color =>

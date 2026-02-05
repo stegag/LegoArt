@@ -457,7 +457,12 @@ function mixInStudMap(studMap, runAfterMixIn) {
     studMap.sortedStuds.forEach((stud) => {
         let existingRow = null;
         Array.from(customStudTableBody.children).forEach((row) => {
-            const rgb = row.children[0].children[0].children[0].children[0].style.backgroundColor
+            const bgColor = row.children[0].children[0].children[0].children[0].style.backgroundColor;
+
+            // FIX: Skip rows where backgroundColor is not set
+            if (!bgColor) return;
+
+            const rgb = bgColor
                 .replace("rgb(", "")
                 .replace(")", "")
                 .split(/,\s*/)
@@ -841,7 +846,12 @@ function runCustomStudMap(skipStep1) {
     const customStudMap = {};
     const customSortedStuds = [];
     Array.from(customStudTableBody.children).forEach((stud) => {
-        const rgb = stud.children[0].children[0].children[0].children[0].style.backgroundColor
+        const bgColor = stud.children[0].children[0].children[0].children[0].style.backgroundColor;
+
+        // FIX: Skip rows where backgroundColor is not set
+        if (!bgColor) return;
+
+        const rgb = bgColor
             .replace("rgb(", "")
             .replace(")", "")
             .split(/,\s*/)
@@ -1950,7 +1960,8 @@ function onCherryPickColor(row, col) {
           )
         : rgbToHex(step3PixelArray[pixelIndex], step3PixelArray[pixelIndex + 1], step3PixelArray[pixelIndex + 2]);
     document.getElementById("paintbrush-controls").children[0].children[0].children[0].style.backgroundColor = colorHex;
-    const hexName = ALL_BRICKLINK_SOLID_COLORS.find((color) => color.hex === colorHex).name;
+    const colorInfo = ALL_BRICKLINK_SOLID_COLORS.find((color) => color.hex === colorHex);
+    const hexName = colorInfo ? colorInfo.name : colorHex;
     document.getElementById("paintbrush-controls").children[0].setAttribute("title", hexName);
     $('[data-toggle="tooltip"]').tooltip("dispose");
     $('[data-toggle="tooltip"]').tooltip();
@@ -2568,7 +2579,7 @@ function runStep4(asyncCallback) {
                 pieceCountsForTable = usedPixelsStudMap;
             }
 
-            const usedColors = Object.keys(pieceCountsForTable);
+            const usedColors = sortColorsByHue(Object.keys(pieceCountsForTable));
             usedColors.sort();
             usedColors.forEach((keyString) => {
                 const pieceKey = keyString.split("_");
@@ -2718,28 +2729,30 @@ function getProjectName() {
 } 
 
 async function generateInstructions() {
-    const projectName = getProjectName();
-    const instructionsCanvasContainer = document.getElementById("instructions-canvas-container");
-    instructionsCanvasContainer.innerHTML = "";
-    disableInteraction();
-    runStep4(async () => {
-        const isHighQuality = document.getElementById("high-quality-instructions-check").checked;
-        const step4PixelArray = getPixelArrayFromCanvas(step4Canvas);
-        const resultImage = isBleedthroughEnabled()
-            ? revertDarkenedImage(
-                  step4PixelArray,
-                  getDarkenedStudsToStuds(ALL_BRICKLINK_SOLID_COLORS.map((color) => color.hex))
-              )
-            : step4PixelArray;
+const projectName = getProjectName();
+const instructionsCanvasContainer = document.getElementById("instructions-canvas-container");
+instructionsCanvasContainer.innerHTML = "";
+disableInteraction();
+runStep4(async () => {
+    const isHighQuality = document.getElementById("high-quality-instructions-check").checked;
+    const step4PixelArray = getPixelArrayFromCanvas(step4Canvas);
+    const resultImage = isBleedthroughEnabled()
+        ? revertDarkenedImage(
+              step4PixelArray,
+              getDarkenedStudsToStuds(ALL_BRICKLINK_SOLID_COLORS.map((color) => color.hex))
+          )
+        : step4PixelArray;
 
-        const titlePageCanvas = document.createElement("canvas");
-        instructionsCanvasContainer.appendChild(titlePageCanvas);
-        const studMap = getUsedPixelsStudMap(resultImage);
-        const filteredAvailableStudHexList = selectedSortedStuds
+    const titlePageCanvas = document.createElement("canvas");
+    instructionsCanvasContainer.appendChild(titlePageCanvas);
+    const studMap = getUsedPixelsStudMap(resultImage);
+    const filteredAvailableStudHexList = sortColorsByHue(
+        selectedSortedStuds
             .filter((pixelHex) => (studMap[pixelHex] || 0) > 0)
             .filter(function (item, pos, self) {
                 return self.indexOf(item) === pos; // remove duplicates
-            });
+            })
+    );
         generateInstructionTitlePage(
             resultImage,
             targetResolution[0],
@@ -3378,7 +3391,8 @@ function onCherryPickColor(row, col) {
         )
         : rgbToHex(step3PixelArray[pixelIndex], step3PixelArray[pixelIndex + 1], step3PixelArray[pixelIndex + 2]);
     document.getElementById("paintbrush-controls").children[0].children[0].children[0].style.backgroundColor = colorHex;
-    const hexName = ALL_BRICKLINK_SOLID_COLORS.find((color) => color.hex === colorHex).name;
+    const colorInfo = ALL_BRICKLINK_SOLID_COLORS.find((color) => color.hex === colorHex);
+    const hexName = colorInfo ? colorInfo.name : colorHex;
     document.getElementById("paintbrush-controls").children[0].setAttribute("title", hexName);
     $('[data-toggle="tooltip"]').tooltip("dispose");
     $('[data-toggle="tooltip"]').tooltip();

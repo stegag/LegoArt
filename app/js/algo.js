@@ -860,7 +860,7 @@ function revertDarkenedImage(pixels, darkenedStudsToStuds) {
     const outputPixels = [...pixels];
     for (let i = 0; i < pixels.length; i += 4) {
         const pixelHex = rgbToHex(pixels[i], pixels[i + 1], pixels[i + 2]);
-        const revertedPixelHex = pixelHex === "#000000" ? "#000000" : darkenedStudsToStuds[pixelHex];
+        const revertedPixelHex = pixelHex === "#000000" ? "#000000" : (darkenedStudsToStuds[pixelHex] || pixelHex);
         const revertedPixelRGB = hexToRgb(revertedPixelHex);
         for (let j = 0; j < 3; j++) {
             outputPixels[i + j] = revertedPixelRGB[j];
@@ -1006,17 +1006,6 @@ function drawStudCountForContext(
         ctx.fillText(colorName, x + radius * 1.5, y + scalingFactor / 2.5);
         ctx.font = `${scalingFactor / 2}px Arial`;
     });
-
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = "#000000";
-    ctx.beginPath();
-    ctx.rect(
-        horizontalOffset - radius * 2,
-        verticalOffset + radius * 0.75,
-        radius * 11,
-        radius * 2.5 * (availableStudHexList.length + 0.5)
-    );
-    ctx.stroke();
 }
 
 function generateInstructionTitlePage(
@@ -1058,11 +1047,6 @@ function generateInstructionTitlePage(
     ctx.font = `${scalingFactor * 2}px Arial`;
     ctx.fillText(projectName, pictureWidth * 0.75, pictureHeight * 0.28);
     ctx.font = `${scalingFactor / 2}px Arial`;
-    ctx.fillText(
-        `Resolution: ${width} x ${pixelArray.length / (4 * width)}`,
-        pictureWidth * 0.75,
-        pictureHeight * 0.34
-    );
 
     const legendHorizontalOffset = pictureWidth * 0.75;
     const legendVerticalOffset = pictureHeight * 0.41;
@@ -1519,11 +1503,6 @@ function generateDepthInstructionTitlePage(
     ctx.fillText(projectName, pictureWidth * 0.75, pictureHeight * 0.28);
     ctx.font = `${scalingFactor / 2}px Arial`;
     ctx.fillText(`Depth Instructions`, pictureWidth * 0.75, pictureHeight * 0.34);
-    ctx.fillText(
-        `Resolution: ${targetResolution[0]} x ${targetResolution[1]}`,
-        pictureWidth * 0.75,
-        pictureHeight * 0.37
-    );
 
     const legendHorizontalOffset = pictureWidth * 0.75;
     const legendVerticalOffset = pictureHeight * 0.41;
@@ -1898,4 +1877,45 @@ function importColorMatrix(jsonString) {
         projectName: colorMatrix.projectName,
         timestamp: colorMatrix.timestamp
     };
+}
+
+/**
+ * Sorts an array of hex colors by hue, with grayscale colors first
+ * Grayscale colors are sorted from white to black
+ * Chromatic colors are sorted by hue: red -> orange -> yellow -> green -> cyan -> blue -> purple -> magenta
+ * @param {Array<string>} hexColors - Array of hex color strings
+ * @returns {Array<string>} Sorted array of hex colors
+ */
+function sortColorsByHue(hexColors) {
+    return hexColors.slice().sort((hexA, hexB) => {
+        const rgbA = hexToRgb(hexA);
+        const rgbB = hexToRgb(hexB);
+        
+        // Convert to HSV
+        const hsvA = rgb2hsv(rgbA[0] / 255, rgbA[1] / 255, rgbA[2] / 255);
+        const hsvB = rgb2hsv(rgbB[0] / 255, rgbB[1] / 255, rgbB[2] / 255);
+        
+        const satThreshold = 0.1; // Colors with saturation below this are considered grayscale
+        
+        const isGrayscaleA = hsvA[1] < satThreshold;
+        const isGrayscaleB = hsvB[1] < satThreshold;
+        
+        // Grayscale colors come first
+        if (isGrayscaleA && !isGrayscaleB) return -1;
+        if (!isGrayscaleA && isGrayscaleB) return 1;
+        
+        // Both grayscale: sort by value (brightness) descending (white to black)
+        if (isGrayscaleA && isGrayscaleB) {
+            return hsvB[2] - hsvA[2];
+        }
+        
+        // Both chromatic: sort by hue, then by saturation, then by value
+        if (Math.abs(hsvA[0] - hsvB[0]) > 1) {
+            return hsvA[0] - hsvB[0];
+        }
+        if (Math.abs(hsvA[1] - hsvB[1]) > 0.05) {
+            return hsvB[1] - hsvA[1]; // Higher saturation first
+        }
+        return hsvB[2] - hsvA[2]; // Higher value (brightness) first
+    });
 }
