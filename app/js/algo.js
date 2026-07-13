@@ -977,16 +977,22 @@ function drawStudCountForContext(
     ctx,
     horizontalOffset,
     verticalOffset,
-    pixelType
+    pixelType,
+    skipZero
 ) {
     const radius = scalingFactor / 2;
     ctx.font = `${scalingFactor / 2}px Arial`;
+    let rowIndex = 0;
     availableStudHexList.forEach((pixelHex, i) => {
+        const count = studMap[pixelHex] || 0;
+        if (skipZero && count === 0) {
+            return;
+        }
         const colorName = HEX_TO_COLOR_NAME[pixelHex] || pixelHex;
         const number = COLOR_NAME_TO_ID[colorName] || (i + 1);
         ctx.beginPath();
         const x = horizontalOffset;
-        const y = verticalOffset + radius * 2.5 * (i + 1);
+        const y = verticalOffset + radius * 2.5 * (rowIndex + 1);
         drawPixel(
             ctx,
             x - radius,
@@ -1000,11 +1006,12 @@ function drawStudCountForContext(
         const numberText = String(number); const textWidth = ctx.measureText(numberText).width; ctx.fillText(numberText, x - textWidth / 2, y + scalingFactor / 8);
         ctx.fillStyle = "#000000";
         if (!("" + pixelType).match("^variable.*$")) {
-            ctx.fillText(`X ${studMap[pixelHex] || 0}`, x + radius * 1.5, y);
+            ctx.fillText(`X ${count}`, x + radius * 1.5, y);
         }
         ctx.font = `${scalingFactor / 2.5}px Arial`;
         ctx.fillText(colorName, x + radius * 1.5, y + scalingFactor / 2.5);
         ctx.font = `${scalingFactor / 2}px Arial`;
+        rowIndex++;
     });
 }
 
@@ -1196,7 +1203,8 @@ function generateInstructionPage(
         ctx,
         pictureWidth * 0.25,
         pictureHeight * 0.2 - radius,
-        pixelType
+        pixelType,
+        true
     );
 }
 
